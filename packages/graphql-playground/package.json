@@ -1,5 +1,5 @@
 {
-  "name": "graphql-playground",
+  "name": "@absinthe/graphql-playground",
   "version": "1.1.2",
   "main": "./lib/lib.js",
   "typings": "./lib/lib.d.ts",
@@ -10,7 +10,7 @@
   ],
   "repository": {
     "type": "git",
-    "url": "http://github.com/graphcool/graphql-playground.git"
+    "url": "https://github.com/absinthe-graphql/graphql-playground"
   },
   "license": "SEE LICENSE IN LICENSE",
   "scripts": {
@@ -99,7 +99,8 @@
     "webpack-dev-server": "^2.9.3",
     "webpack-manifest-plugin": "1.1.0",
     "whatwg-fetch": "1.0.0",
-    "why-did-you-update": "^0.0.8"
+    "why-did-you-update": "^0.0.8",
+    "np": "2.16.1"
   },
   "babel": {
     "plugins": [
@@ -137,7 +138,7 @@
     "rxjs": "^5.0.3",
     "seamless-immutable": "^7.0.1",
     "styled-jsx-postcss": "git+https://github.com/timsuchanek/styled-jsx-postcss#build3",
-    "subscriptions-transport-ws": "^0.8.1"
+    "@absinthe/socket-graphiql": "0.1.1"
   },
   "lint-staged": {
     "*.{ts,tsx}": [

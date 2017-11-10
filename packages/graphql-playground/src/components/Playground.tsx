@@ -12,7 +12,7 @@ import PlaygroundStorage from './PlaygroundStorage'
 import getQueryTypes from './Playground/util/getQueryTypes'
 import debounce from 'graphiql/dist/utility/debounce'
 import { Observable } from 'rxjs/Observable'
-import { SubscriptionClient } from 'subscriptions-transport-ws'
+import { SubscriptionsClient as SubscriptionClient } from '@absinthe/socket-graphiql'
 import isQuerySubscription from './Playground/util/isQuerySubscription'
 import HistoryPopup from './HistoryPopup'
 import * as cx from 'classnames'
@@ -357,7 +357,7 @@ export class Playground extends React.PureComponent<Props & DocsState, State> {
     if (endpoint) {
       this.wsConnections[session.id] = new SubscriptionClient(endpoint, {
         timeout: 20000,
-        connectionParams,
+        params: connectionParams,
       })
     }
   }
@@ -1076,7 +1076,7 @@ query ${operationName} {
       this.observers[session.id].complete()
       delete this.observers[session.id]
     }
-    this.cancelSubscription(session)
+    this.cancelSubscription(session.id)
     this.setWS(session)
   }
 
@@ -1281,7 +1281,12 @@ query ${operationName} {
   }
 
   private handleChangeHeaders = (sessionId: string, headers: any[]) => {
-    this.setValueInSession(sessionId, 'headers', headers)
+    this.setValueInSession(sessionId, 'headers', headers, () => {
+      const concreteSession = this.state.sessions[
+        this.state.selectedSessionIndex
+      ]
+      this.resetSubscription(concreteSession)
+    })
   }
 
   private handleViewerChange = (sessionId: string, viewer: Viewer) => {
@@ -1431,7 +1436,8 @@ query ${operationName} {
     return Boolean(duplicate)
   }
 
-  private cancelSubscription = (session: Session) => {
+  private cancelSubscription = (sessionId: string) => {
+    const session = this.state.sessions.find(sess => sess.id === sessionId)!
     this.setValueInSession(session.id, 'subscriptionActive', false)
     if (session.subscriptionId) {
       if (this.wsConnections[session.id]) {
@@ -1511,7 +1517,7 @@ query ${operationName} {
           const wsConnection = this.wsConnections[session.id]
 
           const id = wsConnection.subscribe(graphQLParams, (err, res) => {
-            const data: any = { data: res, isSubscription: true }
+            const data: any = { data: res.data, isSubscription: true }
             if (err) {
               data.error = err
             }
@@ -1520,7 +1526,7 @@ query ${operationName} {
 
           this.setValueInSession(session.id, 'subscriptionId', id)
           return () => {
-            this.cancelSubscription(session)
+            this.cancelSubscription(session.id)
           }
         })
       }
