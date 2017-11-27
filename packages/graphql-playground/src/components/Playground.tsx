@@ -314,9 +314,13 @@ export class Playground extends React.PureComponent<Props & DocsState, State> {
     this.state.sessions.forEach(session => this.setWS(session))
   }
   setCursor(position: CursorPosition) {
-    const editor = this.graphiqlComponents[this.state.selectedSessionIndex]
-      .queryEditorComponent.editor
-    editor.setCursor(position)
+    try {
+      const editor = this.graphiqlComponents[this.state.selectedSessionIndex]
+        .queryEditorComponent.editor
+      editor.setCursor(position)
+    } catch (e) {
+      // ignore this error
+    }
   }
   renewStack(schema) {
     const rootMap = getRootMap(schema)
