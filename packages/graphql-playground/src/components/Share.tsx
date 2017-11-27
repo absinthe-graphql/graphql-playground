@@ -3,13 +3,13 @@ import Icon from 'graphcool-styles/dist/components/Icon/Icon'
 import { $v } from 'graphcool-styles'
 import ToggleButton from './ToggleButton'
 import Tooltip from './Tooltip'
-import { Theme } from './Playground'
+import { LocalThemeInterface } from './Theme'
 import * as cn from 'classnames'
 import { Button } from './Button'
 import Copy from './Copy'
+import styled, { keyframes } from '../styled'
 
-export interface Props {
-  theme: Theme
+export interface Props extends LocalThemeInterface {
   allTabs: boolean
   httpHeaders: boolean
   history: boolean
@@ -19,6 +19,7 @@ export interface Props {
   onShare: () => void
   shareUrl?: string
   reshare: boolean
+  isSharingAuthorization: boolean
 }
 
 export interface State {
@@ -41,13 +42,13 @@ export default class Share extends React.Component<Props, State> {
       onToggleAllTabs,
       onToggleHistory,
       onToggleHttpHeaders,
-      theme,
+      localTheme,
       shareUrl,
       onShare,
       reshare,
     } = this.props
     return (
-      <div className="settings">
+      <Wrapper>
         <style jsx={true}>{`
           .settings {
             @p: .absolute;
@@ -77,8 +78,8 @@ export default class Share extends React.Component<Props, State> {
             @p: .mt16;
           }
           .button {
-            @p: .ba, .br2, .f14, .fw6, .ttu, .bWhite20, .flex, .itemsCenter,
-              .white40;
+            @p: .br2, .f14, .fw6, .ttu, .flex, .itemsCenter, .white40;
+            border: 1.5px solid rgba(255, 255, 255, 0.2);
             padding: 5px 9px 6px 9px;
           }
           .button:hover,
@@ -111,21 +112,21 @@ export default class Share extends React.Component<Props, State> {
             fill: $darkBlue60;
           }
         `}</style>
-        <div className="icon">
+        <IconWrapper>
           <div
-            className={cn('button', this.props.theme, { open })}
+            className={cn('button', localTheme, { open })}
             onClick={this.toggleTooltip}
           >
             <Icon
               src={require('../assets/icons/share.svg')}
-              color={theme === 'light' ? $v.darkBlue40 : $v.white40}
+              color={localTheme === 'light' ? $v.darkBlue40 : $v.white40}
               stroke={true}
               width={13}
               height={13}
             />
             <span>Share</span>
           </div>
-          <div className="tooltip">
+          <TooltipWrapper>
             <Tooltip
               open={open}
               onClose={this.toggleTooltip}
@@ -133,33 +134,32 @@ export default class Share extends React.Component<Props, State> {
                 horizontal: 'right',
                 vertical: 'bottom',
               }}
+              renderAfterContent={this.renderAuthSharingWarning}
             >
               <div>
-                <div className="row">
-                  <span className="tooltip-text" onClick={onToggleAllTabs}>
+                <Row>
+                  <TooltipText onClick={onToggleAllTabs}>
                     Share all tabs{' '}
-                  </span>
+                  </TooltipText>
                   <ToggleButton checked={allTabs} onChange={onToggleAllTabs} />
-                </div>
-                <div className="row">
-                  <span className="tooltip-text" onClick={onToggleHttpHeaders}>
+                </Row>
+                <Row>
+                  <TooltipText onClick={onToggleHttpHeaders}>
                     HTTP headers{' '}
-                  </span>
+                  </TooltipText>
                   <ToggleButton
                     checked={httpHeaders}
                     onChange={onToggleHttpHeaders}
                   />
-                </div>
-                <div className="row">
-                  <span className="tooltip-text" onClick={onToggleHistory}>
-                    History{' '}
-                  </span>
+                </Row>
+                <Row>
+                  <TooltipText onClick={onToggleHistory}>History </TooltipText>
                   <ToggleButton checked={history} onChange={onToggleHistory} />
-                </div>
-                {shareUrl &&
-                  <div className="row">
-                    <input value={shareUrl} disabled={true} />
-                    <div className="copy">
+                </Row>
+                {shareUrl && (
+                  <Row>
+                    <Input value={shareUrl} disabled={true} />
+                    <CopyWrapper>
                       <Copy text={shareUrl}>
                         <Icon
                           src={require('graphcool-styles/icons/fill/copy.svg')}
@@ -168,23 +168,140 @@ export default class Share extends React.Component<Props, State> {
                           height={25}
                         />
                       </Copy>
-                    </div>
-                  </div>}
-                <div className="row">
+                    </CopyWrapper>
+                  </Row>
+                )}
+                <Row>
                   <div />
                   <Button hideArrow={true} onClick={onShare}>
                     {reshare && shareUrl ? 'Reshare' : 'Share'}
                   </Button>
-                </div>
+                </Row>
               </div>
             </Tooltip>
-          </div>
-        </div>
-      </div>
+          </TooltipWrapper>
+        </IconWrapper>
+      </Wrapper>
     )
+  }
+
+  private renderAuthSharingWarning = () => {
+    if (!this.props.isSharingAuthorization) {
+      return null
+    }
+
+    return <AuthSharingWarning />
   }
 
   private toggleTooltip = () => {
     this.setState(state => ({ open: !state.open }))
   }
 }
+
+const AuthSharingWarning = () => (
+  <Message>
+    <MessageTitle>Watch out!</MessageTitle>
+    You’re sharing your <code>Authorization</code> header with the world!
+  </Message>
+)
+
+// TODO: use theme
+
+const pulse = keyframes`
+  0% {
+    transform: scale(1.04);
+  }
+
+  100% {
+    transform: scale(1);
+  }
+`
+
+const Message = styled.div`
+  padding: 12px 16px;
+  margin-top: 10px;
+
+  font-size: 14px;
+  letter-spacing: normal;
+
+  cursor: default;
+  border-radius: 2px;
+  background: #f3f4f4;
+  box-shadow: 0 1px 6px 0 rgba(0, 0, 0, 0.15);
+
+  animation: ${pulse} 0.7s ease-in-out infinite alternate;
+`
+
+const MessageTitle = styled.div`
+  margin-right: 3px;
+  margin-bottom: 2px;
+  font-weight: bold;
+  color: #2a7ed2;
+`
+
+// Main styled components
+const Wrapper = styled.div`
+  position: absolute;
+  right: 96px;
+  top: 13px;
+  z-index: 1005;
+`
+
+const TooltipText = styled.div`
+  margin-right: 10px;
+
+  font-size: ${p => p.theme.sizes.fontSmall};
+  font-weight: ${p => p.theme.sizes.fontSemiBold};
+  text-transform: uppercase;
+  letter-spacing: 0.53px;
+
+  color: ${p => p.theme.colours.darkBlue50};
+`
+
+const IconWrapper = styled.div`
+  position: relative;
+  cursor: pointer;
+`
+
+const TooltipWrapper = styled.div`
+  position: absolute;
+  right: -21px;
+`
+
+const Row = styled.div`
+  position: relative;
+  min-width: 245px;
+  margin-top: ${p => p.theme.sizes.small16};
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  &:first-child {
+    margin-top: 0;
+  }
+`
+
+const CopyWrapper = styled.div`
+  position: absolute;
+  right: 0;
+
+  &:hover {
+    svg {
+      fill: ${p => p.theme.colours.darkBlue60};
+    }
+  }
+`
+
+const Input = styled.input`
+  display: block;
+  width: 100%;
+  padding: ${p => p.theme.sizes.small6} ${p => p.theme.sizes.small10};
+
+  font-weight: ${p => p.theme.sizes.fontSemiBold};
+  font-size: ${p => p.theme.sizes.fontTiny};
+
+  border-radius: ${p => p.theme.sizes.smallRadius};
+  background: ${p => p.theme.colours.darkBlue10};
+  color: ${p => p.theme.colours.darkBlue};
+`

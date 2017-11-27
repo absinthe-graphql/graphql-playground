@@ -89,9 +89,10 @@ class InitialView extends React.Component<
       // Check if there is a .graphqlconfig file in the folder
       if (
         !existsSync(resolve(path, '.graphqlconfig')) &&
+        !existsSync(resolve(path, '.graphqlconfig.yml')) &&
         !existsSync(resolve(path, '.graphqlconfig.yaml'))
       ) {
-        alert('No .graphqlconfig (or .graphqlconfig.yaml) found in this folder')
+        alert('No .graphqlconfig found in this folder')
         return
       }
       this.props.selectHistory({
@@ -190,74 +191,72 @@ class InitialView extends React.Component<
           style={modalStyle}
         >
           <div className="initial-view-content">
-            {history.length > 0
-              ? <div className="initial-view-recent">
-                  <div className="initial-view-recent-header">RECENT</div>
-                  <div className="initial-view-recent-list">
-                    {history.map(data =>
-                      <div
-                        className="list-item"
-                        // tslint:disable-next-line
-                        onClick={() => this.handleClickHistory(data)}
-                      >
-                        <div className="list-item-name" title={data.path}>
-                          {data.path}
-                        </div>
-                        <div className="list-item-date">
-                          <Icon
-                            src={
-                              data.type === 'local'
-                                ? require('../icons/folder.svg')
-                                : require('graphcool-styles/icons/fill/world.svg')
-                            }
-                            color={$v.gray40}
-                            width={14}
-                            height={14}
-                          />
-                          <span>
-                            Last opened {format(data.lastOpened, 'DD.MM.YYYY')}
-                          </span>
-                        </div>
-                      </div>,
-                    )}
-                  </div>
+            {history.length > 0 ? (
+              <div className="initial-view-recent">
+                <div className="initial-view-recent-header">RECENT</div>
+                <div className="initial-view-recent-list">
+                  {history.map(data => (
+                    <div
+                      className="list-item"
+                      // tslint:disable-next-line
+                      onClick={() => this.handleClickHistory(data)}
+                    >
+                      <div className="list-item-name" title={data.path}>
+                        {data.path}
+                      </div>
+                      <div className="list-item-date">
+                        <Icon
+                          src={
+                            data.type === 'local'
+                              ? require('../icons/folder.svg')
+                              : require('graphcool-styles/icons/fill/world.svg')
+                          }
+                          color={$v.gray40}
+                          width={14}
+                          height={14}
+                        />
+                        <span>
+                          Last opened {format(data.lastOpened, 'DD.MM.YYYY')}
+                        </span>
+                      </div>
+                    </div>
+                  ))}
                 </div>
-              : <div className="initial-view-recent">
-                  <div className="initial-view-recent-header">EXAMPLES</div>
-                  <div className="initial-view-recent-list">
-                    {examples.map(example =>
-                      <div
-                        className="list-item"
-                        // tslint:disable-next-line
-                        onClick={() =>
-                          this.props.onSelectEndpoint(example.endpoint)}
-                      >
-                        <div
-                          className="list-item-name"
-                          title={example.endpoint}
-                        >
-                          {example.name}
-                        </div>
-                        <div className="list-item-date">
-                          <Icon
-                            src={require('graphcool-styles/icons/fill/world.svg')}
-                            color={$v.gray40}
-                            width={14}
-                            height={14}
-                          />
-                          <span>
-                            {example.endpoint}
-                          </span>
-                        </div>
-                      </div>,
-                    )}
-                  </div>
-                </div>}
+              </div>
+            ) : (
+              <div className="initial-view-recent">
+                <div className="initial-view-recent-header">EXAMPLES</div>
+                <div className="initial-view-recent-list">
+                  {examples.map(example => (
+                    <div
+                      className="list-item"
+                      // tslint:disable-next-line
+                      onClick={() =>
+                        this.props.onSelectEndpoint(example.endpoint)
+                      }
+                    >
+                      <div className="list-item-name" title={example.endpoint}>
+                        {example.name}
+                      </div>
+                      <div className="list-item-date">
+                        <Icon
+                          src={require('graphcool-styles/icons/fill/world.svg')}
+                          color={$v.gray40}
+                          width={14}
+                          height={14}
+                        />
+                        <span>{example.endpoint}</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
             <div className="initial-view-workspace">
               <h1 className="title">New workspace</h1>
               <p className="description">
-                Either load a local repository with a .graphqlrc file, or just
-                display a remote endpoint
+                Either load a local repository with a .graphqlconfig file, or
+                just open a HTTP endpoint
               </p>
               <div className="toggle">
                 <Toggle
@@ -266,7 +265,7 @@ class InitialView extends React.Component<
                   onChange={this.handleChangeMode}
                 />
               </div>
-              {selectedMode === 'url endpoint' &&
+              {selectedMode === 'url endpoint' && (
                 <form className="container-input" onSubmit={this.handleSubmit}>
                   <input
                     className="input"
@@ -275,8 +274,9 @@ class InitialView extends React.Component<
                     onChange={this.handleChangeEndpoint}
                   />
                   <button>OPEN</button>
-                </form>}
-              {selectedMode === 'local' &&
+                </form>
+              )}
+              {selectedMode === 'local' && (
                 <div
                   className="container-input"
                   onClick={this.handleClickLocal}
@@ -288,7 +288,8 @@ class InitialView extends React.Component<
                     onChange={this.handleChangeEndpoint}
                   />
                   <button>OPEN</button>
-                </div>}
+                </div>
+              )}
             </div>
           </div>
         </Modal>

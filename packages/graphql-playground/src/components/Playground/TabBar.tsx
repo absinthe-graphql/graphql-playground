@@ -2,29 +2,23 @@ import * as React from 'react'
 import * as cx from 'classnames'
 import { Session } from '../../types'
 import { Icon } from 'graphcool-styles'
-import withTheme from '../Theme/withTheme'
+import { withTheme, OptionalLocalThemeInterface } from '../Theme'
 import Tab from './Tab'
 
-export interface Props {
+export interface Props extends OptionalLocalThemeInterface {
   sessions: Session[]
   selectedSessionIndex: number
   onNewSession: any
   onCloseSession: (session: Session) => void
   onOpenHistory: () => void
   onSelectSession: (session: Session) => void
-  onboardingStep?: string
-  tether?: any
-  nextStep?: () => void
-  theme?: string
   isApp?: boolean
 }
 
 const white20 = '#4a555f'
 const darkBlue20 = '#c2c8cb'
 
-export const TabBar = withTheme<
-  Props
->(
+export const TabBar = withTheme<Props>(
   ({
     sessions,
     selectedSessionIndex,
@@ -32,16 +26,11 @@ export const TabBar = withTheme<
     onSelectSession,
     onOpenHistory,
     onCloseSession,
-    onboardingStep,
-    tether,
-    theme,
+    localTheme,
     isApp,
-    nextStep,
   }: Props) => {
-    const Tether = tether
-
     return (
-      <div className={cx('tabbar', theme)}>
+      <div className={cx('tabbar', localTheme)}>
         <style jsx={true}>{`
           .tab {
             @p: .flex,
@@ -58,12 +47,14 @@ export const TabBar = withTheme<
             &.active {
               @p: .bgDarkBlue;
             }
+            border-bottom: 2px solid #172a3a;
           }
           .light .tab {
             background-color: #e7eaec;
             &.active {
               background-color: #eeeff0;
             }
+            border-bottom: 2px solid #eeeff0;
           }
           .tabbar {
             @p: .white, .z4;
@@ -81,7 +72,7 @@ export const TabBar = withTheme<
           }
 
           .tabs {
-            @p: .mt16, .ml16, .flex, .itemsCenter, .z0, .overflowAuto;
+            @p: .mt16, .ml0, .flex, .itemsCenter, .z0, .overflowAuto;
             margin-right: 240px;
           }
 
@@ -164,6 +155,8 @@ export const TabBar = withTheme<
             height: 8px;
             background-color: #eeeff0;
             width: 100%;
+            top: -2px;
+            position: relative;
           }
           .tab:hover {
             @p: .bgDarkBlue;
@@ -181,7 +174,7 @@ export const TabBar = withTheme<
           }
         `}</style>
         <div className={cx('tabs', { isApp })}>
-          {sessions.map((session, index) =>
+          {sessions.map((session, index) => (
             <Tab
               key={session.id}
               session={session}
@@ -189,44 +182,20 @@ export const TabBar = withTheme<
               onSelectSession={onSelectSession}
               selectedSessionIndex={selectedSessionIndex}
               onCloseSession={onCloseSession}
-              tether={tether}
-              theme={theme}
-              onboardingStep={onboardingStep}
-            />,
-          )}
-          {tether && onboardingStep === 'STEP3_CREATE_MUTATION_TAB'
-            ? <Tether
-                offsetY={-7}
-                steps={[
-                  {
-                    step: 'STEP3_CREATE_MUTATION_TAB',
-                    title: 'Apparently, there is no data yet',
-                    description: 'Click here to create new data',
-                  },
-                ]}
-              >
-                <div className="tab plus" onClick={onNewSession}>
-                  <Icon
-                    src={require('graphcool-styles/icons/stroke/add.svg')}
-                    color={theme === 'dark' ? white20 : darkBlue20}
-                    width={34}
-                    height={34}
-                    stroke={true}
-                    strokeWidth={4}
-                  />
-                </div>
-              </Tether>
-            : <div className="tab plus" onClick={onNewSession}>
-                <Icon
-                  src={require('graphcool-styles/icons/stroke/add.svg')}
-                  color={theme === 'dark' ? white20 : darkBlue20}
-                  width={34}
-                  height={34}
-                  stroke={true}
-                  strokeWidth={4}
-                />
-              </div>}
-          <div className={cx('history', theme)}>
+              localTheme={localTheme}
+            />
+          ))}
+          <div className="tab plus" onClick={onNewSession}>
+            <Icon
+              src={require('graphcool-styles/icons/stroke/add.svg')}
+              color={localTheme === 'dark' ? white20 : darkBlue20}
+              width={34}
+              height={34}
+              stroke={true}
+              strokeWidth={4}
+            />
+          </div>
+          <div className={cx('history', localTheme)}>
             <Icon
               className="icon"
               src={require('graphcool-styles/icons/stroke/history.svg')}
@@ -234,12 +203,12 @@ export const TabBar = withTheme<
               strokeWidth={4}
               width={27}
               height={27}
-              color={theme === 'dark' ? white20 : darkBlue20}
+              color={localTheme === 'dark' ? white20 : darkBlue20}
               onClick={onOpenHistory}
             />
           </div>
         </div>
-        {theme === 'light' && <div className="border-bottom" />}
+        {localTheme === 'light' && <div className="border-bottom" />}
       </div>
     )
   },

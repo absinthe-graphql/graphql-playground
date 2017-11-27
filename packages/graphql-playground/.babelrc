@@ -5,6 +5,8 @@
     "react"
   ],
   "plugins": [
-    "styled-jsx-postcss/babel"
+    "styled-jsx-postcss/babel",
+    "babel-plugin-styled-components",
+    "babel-plugin-polished"
   ]
 }

@@ -1,4 +1,5 @@
 import * as React from 'react'
+import * as fetch from 'isomorphic-fetch'
 import Popup from './Popup'
 import { throttle } from 'lodash'
 import * as cn from 'classnames'
@@ -16,7 +17,7 @@ export interface State {
 
 export default class EndpointPopup extends React.Component<Props, State> {
   checkEndpoint = throttle(() => {
-    if (this.state.endpoint.match(/^http:\/\/\w+(\.\w+)*(:[0-9]+)?\/?.*$/)) {
+    if (this.state.endpoint.match(/^https?:\/\/\w+(\.\w+)*(:[0-9]+)?\/?.*$/)) {
       fetch(this.state.endpoint, {
         method: 'post',
         headers: {
